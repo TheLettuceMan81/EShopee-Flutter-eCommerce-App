@@ -2,7 +2,7 @@ name: Build Release APK
 
 on:
   push:
-    branches: [main, master, release]
+    branches: [main]
     tags:
       - 'v*'
 
@@ -20,17 +20,18 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
       
+      # Use Flutter 1.22.6 which is compatible with your dependencies
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '2.10.0'
+          flutter-version: '1.22.6'
           channel: 'stable'
       
       - name: Get dependencies
         run: flutter pub get
       
-      # Add this step to handle the migration warning
-      - name: Build APK with migration flag
+      # Make sure to use the ignore-deprecation flag
+      - name: Build APK
         run: flutter build apk --release --ignore-deprecation
       
       - name: Get version from tag
@@ -39,7 +40,8 @@ jobs:
       
       - name: Rename APK
         run: |
-          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/e-commerce-app-${{ steps.get_version.outputs.VERSION }}.apk
+          mkdir -p build/app/outputs/flutter-apk/
+          mv build/app/outputs/apk/release/app-release.apk build/app/outputs/flutter-apk/e-commerce-app-${{ steps.get_version.outputs.VERSION }}.apk
       
       - name: Create Release
         uses: softprops/action-gh-release@v1
